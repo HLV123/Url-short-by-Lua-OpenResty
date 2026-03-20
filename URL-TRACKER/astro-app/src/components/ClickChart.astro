@@ -1,0 +1,91 @@
+---
+---
+
+<div class="bg-white rounded-xl p-6 border border-border stat-card">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-navy flex items-center gap-2">
+      <span>📊</span> Clicks theo giờ (24h)
+    </h3>
+    <span class="text-xs text-text-muted bg-bg-alt px-2 py-1 rounded">Cập nhật mỗi 5s</span>
+  </div>
+  <div class="relative" style="height: 280px;">
+    <canvas id="clicks-chart"></canvas>
+  </div>
+</div>
+
+<script>
+  function initClickChart(data: number[]) {
+    const ctx = document.getElementById('clicks-chart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    const labels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+    const maxVal = Math.max(...data, 1);
+
+    // @ts-ignore
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Clicks',
+          data,
+          backgroundColor: data.map((v: number) => v === maxVal ? '#EE6123' : 'rgba(37, 99, 235, 0.7)'),
+          borderRadius: 4,
+          borderSkipped: false,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1B1F3B',
+            titleFont: { family: 'Inter', size: 12 },
+            bodyFont: { family: 'Inter', size: 13, weight: '600' },
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (ctx: any) => `${ctx.parsed.y} clicks`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              font: { family: 'Inter', size: 10 },
+              color: '#6B7280',
+              maxRotation: 0,
+              callback: function(val: any, index: number) {
+                return index % 3 === 0 ? labels[index] : '';
+              },
+            },
+            border: { display: false },
+          },
+          y: {
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: {
+              font: { family: 'Inter', size: 11 },
+              color: '#6B7280',
+              padding: 8,
+            },
+            border: { display: false },
+            beginAtZero: true,
+          },
+        },
+        animation: {
+          duration: 800,
+          easing: 'easeOutQuart',
+        },
+      },
+    });
+  }
+
+  // Expose for dashboard page to call
+  // @ts-ignore
+  window.initClickChart = initClickChart;
+</script>

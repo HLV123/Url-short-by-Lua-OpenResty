@@ -1,0 +1,116 @@
+---
+---
+
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-bold text-navy mb-4">
+        Xem mọi thứ trong <span class="text-primary">một dashboard</span>
+      </h2>
+      <p class="text-text-muted text-lg max-w-2xl mx-auto">
+        Real-time analytics, biểu đồ trực quan, phân tích quốc gia và thiết bị — tất cả trong một giao diện đẹp mắt.
+      </p>
+    </div>
+
+    <!-- Browser Frame -->
+    <div class="browser-frame max-w-5xl mx-auto">
+      <div class="browser-frame-bar">
+        <div class="browser-dot bg-red-400"></div>
+        <div class="browser-dot bg-yellow-400"></div>
+        <div class="browser-dot bg-green-400"></div>
+        <div class="browser-url">
+          trk.pro/dashboard/xk9f2a
+        </div>
+      </div>
+
+      <!-- Dashboard Mockup Content -->
+      <div class="bg-bg-alt p-6">
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-2xl sm:text-3xl font-extrabold text-primary">1,240</div>
+            <div class="text-xs text-text-muted mt-1">Total Clicks</div>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-2xl sm:text-3xl font-extrabold text-blue">89</div>
+            <div class="text-xs text-text-muted mt-1">Unique IPs</div>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-2xl sm:text-3xl font-extrabold text-navy">12</div>
+            <div class="text-xs text-text-muted mt-1">Countries</div>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-2xl sm:text-3xl font-extrabold text-success">3d</div>
+            <div class="text-xs text-text-muted mt-1">Created</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid md:grid-cols-5 gap-4 mb-6">
+          <!-- Bar chart mock -->
+          <div class="md:col-span-3 bg-white rounded-lg p-4 border border-border">
+            <div class="text-sm font-semibold text-navy mb-3">📊 Clicks theo giờ (24h)</div>
+            <div class="flex items-end gap-[3px] h-24">
+              {[5,12,8,3,2,4,15,20,18,14,9,7,4,6,8,10,16,12,8,5,4,3,2,1].map((v, i) => (
+                <div class="flex-1 rounded-t" style={`height: ${v * 5}%; background: ${i === 7 ? '#EE6123' : '#2563EB'}; opacity: ${i === 7 ? 1 : 0.7};`} />
+              ))}
+            </div>
+          </div>
+          <!-- Live feed mock -->
+          <div class="md:col-span-2 bg-navy rounded-lg p-4 text-white">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse-live"></span>
+              <span class="text-sm font-semibold">LIVE FEED</span>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center gap-2 bg-white/5 p-2 rounded border-l-2 border-success">
+                <span>🇻🇳</span><span class="text-white/60">HN</span><span>📱</span><span class="ml-auto text-white/40">2s</span>
+              </div>
+              <div class="flex items-center gap-2 bg-white/5 p-2 rounded border-l-2 border-white/10">
+                <span>🇯🇵</span><span class="text-white/60">TK</span><span>💻</span><span class="ml-auto text-white/40">5s</span>
+              </div>
+              <div class="flex items-center gap-2 bg-white/5 p-2 rounded border-l-2 border-white/10">
+                <span>🇺🇸</span><span class="text-white/60">NY</span><span>📱</span><span class="ml-auto text-white/40">8s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-sm font-semibold text-navy mb-2">🌏 Quốc gia</div>
+            <div class="space-y-1.5 text-xs">
+              <div class="flex items-center gap-2">
+                <span>🇻🇳 VN</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-primary h-full rounded-full" style="width: 65%"></div></div>
+                <span class="text-text-muted">65%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>🇺🇸 US</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-1.5"><div class="bg-blue h-full rounded-full" style="width: 20%"></div></div>
+                <span class="text-text-muted">20%</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-sm font-semibold text-navy mb-2">📱 Thiết bị</div>
+            <div class="space-y-1.5 text-xs">
+              <div class="flex justify-between"><span>Mobile</span><span class="font-medium">60%</span></div>
+              <div class="flex justify-between"><span>Desktop</span><span class="font-medium">35%</span></div>
+              <div class="flex justify-between"><span>Tablet</span><span class="font-medium">5%</span></div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-border">
+            <div class="text-sm font-semibold text-navy mb-2">🔗 Referer</div>
+            <div class="space-y-1.5 text-xs">
+              <div class="flex justify-between"><span>google.com</span><span class="font-medium">45%</span></div>
+              <div class="flex justify-between"><span>facebook.com</span><span class="font-medium">30%</span></div>
+              <div class="flex justify-between"><span>direct</span><span class="font-medium">25%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

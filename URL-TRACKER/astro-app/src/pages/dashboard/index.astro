@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import StatsHero from '../../components/StatsHero.astro';
+import ClickChart from '../../components/ClickChart.astro';
+import GeoTable from '../../components/GeoTable.astro';
+import DeviceBreakdown from '../../components/DeviceBreakdown.astro';
+import RefererTable from '../../components/RefererTable.astro';
+import Footer from '../../components/Footer.astro';
+import '../../styles/global.css';
+
+// Static build — code will be filled by JS from URL
+const code = '...';
+---
+
+<BaseLayout title="Dashboard | URL Tracker Pro">
+  <Navbar transparent={false} />
+  <StatsHero code={code} />
+
+  <div class="bg-bg-alt min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Row 1: Chart full width -->
+      <div class="mb-6">
+        <ClickChart />
+      </div>
+
+      <!-- Live Feed status bar -->
+      <div class="bg-navy rounded-xl px-6 py-4 border border-white/5 flex items-center justify-between mb-6">
+        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+          <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse-live"></span>
+          LIVE FEED
+        </h3>
+        <span class="text-xs text-white/40" id="feed-status">Đang kết nối...</span>
+      </div>
+
+      <!-- Row 2: Geo + Device + Referer -->
+      <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <GeoTable />
+        <DeviceBreakdown />
+        <RefererTable />
+      </div>
+
+      <!-- Action Bar -->
+      <div class="bg-white rounded-xl p-4 border border-border flex flex-wrap items-center justify-center gap-3">
+        <a id="export-csv-btn" href="#" class="btn-secondary text-sm !py-2.5 !px-5 flex items-center gap-2 no-underline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </a>
+        <button id="copy-link-btn" class="btn-secondary text-sm !py-2.5 !px-5 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy link
+        </button>
+        <button id="share-btn" class="btn-primary text-sm !py-2.5 !px-5 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  // ─── Extract code from URL ────────────────────────────
+  const pathParts = window.location.pathname.replace(/\/+$/, '').split('/');
+  const code = pathParts[pathParts.length - 1] || 'unknown';
+
+  document.title = `Dashboard — ${code} | URL Tracker Pro`;
+  const codeEl = document.getElementById('stats-code');
+  if (codeEl) codeEl.textContent = code;
+  const exportBtn = document.getElementById('export-csv-btn') as HTMLAnchorElement;
+  if (exportBtn) exportBtn.href = `/api/export/${code}`;
+
+  // ─── Load stats ───────────────────────────────────────
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`/api/stats/${code}`);
+      if (!res.ok) throw new Error('Not found');
+      const s = await res.json();
+
+      const set = (id: string, v: string) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      set('stats-url', s.url);
+      set('stat-clicks', (s.total_clicks||0).toLocaleString());
+      set('stat-unique', (s.unique_ips||0).toLocaleString());
+      set('stat-countries', (s.top_countries?.length||0).toString());
+
+      const visitUrl = document.getElementById('visit-url') as HTMLAnchorElement;
+      if (visitUrl) visitUrl.href = s.url;
+
+      if (s.created) {
+        const sec = Math.floor(Date.now()/1000 - s.created);
+        let t = sec < 60 ? 'Vừa xong' : sec < 3600 ? `${Math.floor(sec/60)}m` : sec < 86400 ? `${Math.floor(sec/3600)}h` : `${Math.floor(sec/86400)}d`;
+        set('stat-created', t);
+      }
+
+      // @ts-ignore
+      if (s.clicks_by_hour && window.initClickChart) window.initClickChart(s.clicks_by_hour);
+      // @ts-ignore
+      if (s.top_countries && window.renderGeoTable) window.renderGeoTable(s.top_countries, s.total_clicks);
+      // @ts-ignore
+      if (s.device_breakdown && window.renderDeviceBreakdown) window.renderDeviceBreakdown(s.device_breakdown);
+      // @ts-ignore
+      if (s.top_referers && window.renderRefererTable) window.renderRefererTable(s.top_referers, s.total_clicks);
+    } catch (e) { console.error('Dashboard load error:', e); }
+  }
+
+  // ─── SSE Live Feed (status only) ─────────────────────
+  function connectSSE() {
+    const statusEl = document.getElementById('feed-status');
+    try {
+      const es = new EventSource(`/api/stream?code=${code}`);
+      es.onopen = () => {
+        if (statusEl) { statusEl.textContent = '● Kết nối'; statusEl.className = 'text-xs text-emerald-400'; }
+      };
+      es.onerror = () => {
+        if (statusEl) { statusEl.textContent = '○ Mất kết nối'; statusEl.className = 'text-xs text-red-400'; }
+        es.close(); setTimeout(connectSSE, 5000);
+      };
+    } catch(e) {}
+  }
+
+  // ─── Buttons ──────────────────────────────────────────
+  document.getElementById('copy-link-btn')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(`${window.location.origin}/${code}`).then(() => {
+      const b = document.getElementById('copy-link-btn');
+      if(b){const o=b.innerHTML; b.textContent='✓ Đã copy!'; setTimeout(()=>{b.innerHTML=o;},2000);}
+    });
+  });
+  document.getElementById('copy-short-url')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(`${window.location.origin}/${code}`).then(() => {
+      const b = document.getElementById('copy-short-url');
+      if(b){b.textContent='✓ Copied'; setTimeout(()=>{b.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;},2000);}
+    });
+  });
+  document.getElementById('share-btn')?.addEventListener('click', () => {
+    if(navigator.share) navigator.share({title:`Dashboard — ${code}`,url:window.location.href});
+    else navigator.clipboard.writeText(window.location.href).then(()=>{const b=document.getElementById('share-btn');if(b){const o=b.innerHTML;b.textContent='✓ Copied!';setTimeout(()=>{b.innerHTML=o;},2000);}});
+  });
+  loadDashboard();
+  connectSSE();
+</script>

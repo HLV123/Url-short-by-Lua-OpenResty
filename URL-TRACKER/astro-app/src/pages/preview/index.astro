@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import '../../styles/global.css';
+---
+
+<BaseLayout title="Link Preview | URL Tracker Pro">
+  <Navbar transparent={false} />
+
+  <div class="min-h-screen bg-bg-alt flex items-center justify-center px-4 pt-20 pb-12">
+    <div class="bg-white rounded-2xl shadow-xl border border-border p-8 max-w-md w-full text-center animate-fade-in">
+      <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EE6123" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      </div>
+
+      <h1 class="text-xl font-bold text-navy mb-2">Link Preview</h1>
+      <p class="text-text-muted text-sm mb-6">Bạn đang xem trước link rút gọn:</p>
+
+      <div class="bg-bg-alt rounded-lg p-3 mb-4">
+        <code class="text-sm font-mono text-navy font-semibold" id="preview-short">...</code>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-xs text-text-muted mb-1">Sẽ chuyển hướng đến:</p>
+        <p class="text-sm text-blue break-all font-medium" id="preview-url">Đang tải...</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 mb-6 text-sm">
+        <div class="flex items-center gap-1.5 text-text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="preview-clicks">—</span> clicks
+        </div>
+        <div class="flex items-center gap-1.5 text-text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="preview-date">—</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <a href="/" class="btn-secondary flex-1 text-center text-sm no-underline">← Quay lại</a>
+        <a id="preview-continue" href="#" class="btn-primary flex-1 text-center text-sm no-underline">Tiếp tục →</a>
+      </div>
+    </div>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  // Extract code: /preview/xyz → xyz
+  const pathParts = window.location.pathname.replace(/\/+$/, '').split('/');
+  const code = pathParts[pathParts.length - 1] || '';
+
+  const shortEl = document.getElementById('preview-short');
+  if (shortEl) shortEl.textContent = code;
+  document.title = `Preview — ${code} | URL Tracker Pro`;
+
+  async function loadPreview() {
+    try {
+      const res = await fetch(`/api/stats/${code}`);
+      if (!res.ok) {
+        const urlEl = document.getElementById('preview-url');
+        if (urlEl) urlEl.textContent = 'Link không tồn tại';
+        return;
+      }
+      const stats = await res.json();
+      const urlEl = document.getElementById('preview-url');
+      if (urlEl) urlEl.textContent = stats.url;
+      const clicksEl = document.getElementById('preview-clicks');
+      if (clicksEl) clicksEl.textContent = (stats.total_clicks || 0).toLocaleString();
+      if (stats.created) {
+        const dateEl = document.getElementById('preview-date');
+        if (dateEl) dateEl.textContent = new Date(stats.created * 1000).toLocaleDateString('vi-VN');
+      }
+      const continueBtn = document.getElementById('preview-continue') as HTMLAnchorElement;
+      if (continueBtn) continueBtn.href = stats.url;
+    } catch (e) {
+      const urlEl = document.getElementById('preview-url');
+      if (urlEl) urlEl.textContent = 'Không thể tải thông tin';
+    }
+  }
+  loadPreview();
+</script>

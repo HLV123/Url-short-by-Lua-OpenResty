@@ -1,0 +1,60 @@
+---
+---
+
+<div class="bg-white rounded-xl p-6 border border-border stat-card">
+  <h3 class="text-lg font-semibold text-navy flex items-center gap-2 mb-4">
+    <span>🌏</span> Top quốc gia
+  </h3>
+
+  <div id="geo-table" class="space-y-3">
+    <div class="text-sm text-text-muted text-center py-4">Đang tải...</div>
+  </div>
+</div>
+
+<script>
+  const COUNTRY_NAMES: Record<string, string> = {
+    VN: 'Việt Nam', US: 'Hoa Kỳ', JP: 'Nhật Bản', KR: 'Hàn Quốc', CN: 'Trung Quốc',
+    DE: 'Đức', FR: 'Pháp', GB: 'Anh', AU: 'Úc', CA: 'Canada',
+    SG: 'Singapore', TH: 'Thái Lan', IN: 'Ấn Độ', BR: 'Brazil', RU: 'Nga',
+  };
+  const FLAGS: Record<string, string> = {
+    VN: '🇻🇳', US: '🇺🇸', JP: '🇯🇵', KR: '🇰🇷', CN: '🇨🇳',
+    DE: '🇩🇪', FR: '🇫🇷', GB: '🇬🇧', AU: '🇦🇺', CA: '🇨🇦',
+    SG: '🇸🇬', TH: '🇹🇭', IN: '🇮🇳', BR: '🇧🇷', RU: '🇷🇺',
+  };
+
+  const COLORS = ['#EE6123', '#2563EB', '#10B981', '#8B5CF6', '#F59E0B'];
+
+  function renderGeoTable(countries: { country: string; clicks: number }[], total: number) {
+    const container = document.getElementById('geo-table');
+    if (!container || !countries.length) {
+      if (container) container.innerHTML = '<div class="text-sm text-text-muted text-center py-4">Chưa có dữ liệu</div>';
+      return;
+    }
+
+    container.innerHTML = countries.slice(0, 5).map((c, i) => {
+      const pct = total > 0 ? Math.round((c.clicks / total) * 100) : 0;
+      const flag = FLAGS[c.country] || '🌍';
+      const name = COUNTRY_NAMES[c.country] || c.country;
+      const color = COLORS[i] || '#6B7280';
+
+      return `
+        <div class="flex items-center gap-3">
+          <span class="text-lg w-7 text-center">${flag}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-text-main">${name}</span>
+              <span class="text-sm text-text-muted tabular-nums">${c.clicks.toLocaleString()} <span class="text-xs">(${pct}%)</span></span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // @ts-ignore
+  window.renderGeoTable = renderGeoTable;
+</script>

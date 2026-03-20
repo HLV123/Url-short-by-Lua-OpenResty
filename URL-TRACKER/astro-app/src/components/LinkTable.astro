@@ -1,0 +1,76 @@
+---
+---
+
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-navy">Link gần đây</h2>
+      <span id="link-count" class="text-sm text-text-muted"></span>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-border">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-bg-alt text-left">
+            <th class="px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wider">Code</th>
+            <th class="px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wider">URL gốc</th>
+            <th class="px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wider text-center">Clicks</th>
+            <th class="px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wider">Ngày tạo</th>
+            <th class="px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wider text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="link-table-body">
+          <!-- Populated by JS -->
+          <tr>
+            <td colspan="5" class="px-4 py-12 text-center text-text-muted">
+              <div class="flex flex-col items-center gap-2">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-border"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Chưa có link nào. Tạo link đầu tiên ở trên!</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+  async function loadRecentLinks() {
+    try {
+      const res = await fetch('/api/links');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const links = Object.entries(data).sort((a: any, b: any) => b[1].created - a[1].created).slice(0, 10);
+      const tbody = document.getElementById('link-table-body');
+      const countEl = document.getElementById('link-count');
+
+      if (!tbody || links.length === 0) return;
+
+      if (countEl) countEl.textContent = `${Object.keys(data).length} link`;
+
+      tbody.innerHTML = links.map(([code, info]: [string, any], i: number) => {
+        const url = info.url.length > 50 ? info.url.substring(0, 50) + '...' : info.url;
+        const date = new Date(info.created * 1000).toLocaleDateString('vi-VN');
+        return `
+          <tr class="border-t border-border hover:bg-bg-alt transition-colors ${i % 2 === 0 ? '' : 'bg-bg-alt/50'}">
+            <td class="px-4 py-3">
+              <a href="/dashboard/${code}" class="font-mono text-blue font-medium hover:underline">${code}</a>
+            </td>
+            <td class="px-4 py-3 text-text-muted max-w-xs truncate" title="${info.url}">${url}</td>
+            <td class="px-4 py-3 text-center font-semibold">${(info.total_clicks || 0).toLocaleString()}</td>
+            <td class="px-4 py-3 text-text-muted">${date}</td>
+            <td class="px-4 py-3 text-right">
+              <a href="/dashboard/${code}" class="text-blue hover:underline text-xs font-medium">Xem stats →</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (e) {
+      // silent fail — table shows empty state
+    }
+  }
+
+  loadRecentLinks();
+</script>

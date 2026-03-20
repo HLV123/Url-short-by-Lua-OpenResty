@@ -1,0 +1,42 @@
+---
+interface Props {
+  code: string;
+}
+const { code } = Astro.props;
+---
+
+<div class="bg-navy rounded-xl p-6 border border-white/5 flex items-center justify-between">
+  <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse-live"></span>
+    LIVE FEED
+  </h3>
+  <span class="text-xs text-white/40" id="feed-status">Đang kết nối...</span>
+</div>
+
+<script define:vars={{ code }}>
+  function connectSSE() {
+    const statusEl = document.getElementById('feed-status');
+    try {
+      const es = new EventSource(`/api/stream?code=${code}`);
+      es.onopen = () => {
+        if (statusEl) {
+          statusEl.textContent = '● Kết nối';
+          statusEl.classList.add('text-emerald-400');
+          statusEl.classList.remove('text-white/40');
+        }
+      };
+      es.onerror = () => {
+        if (statusEl) {
+          statusEl.textContent = '○ Mất kết nối';
+          statusEl.classList.remove('text-emerald-400');
+          statusEl.classList.add('text-red-400');
+        }
+        es.close();
+        setTimeout(connectSSE, 5000);
+      };
+    } catch (e) {
+      if (statusEl) statusEl.textContent = '✕ Không kết nối được';
+    }
+  }
+  connectSSE();
+</script>

@@ -1,0 +1,9 @@
+2026/03/20 22:38:02 [notice] 6184#18640: signal process started
+2026/03/20 22:38:02 [error] 6184#18640: OpenEvent("Global\ngx_stop_17440") failed (2: The system cannot find the file specified)
+2026/03/20 22:39:01 [notice] 6280#4032: using the "select" event method
+2026/03/20 22:39:01 [notice] 6280#4032: openresty/1.29.2.1
+2026/03/20 22:39:01 [info] 6280#4032: OS: 300000 build:26200, "", suite:300, type:1
+2026/03/20 22:39:01 [notice] 6280#4032: start worker processes
+2026/03/20 22:39:01 [notice] 6280#4032: start worker process 16916
+2026/03/20 22:39:01 [notice] 16916#20140: openresty/1.29.2.1
+2026/03/20 22:39:01 [info] 16916#20140: OS: 300000 build:26200, "", suite:300, type:1

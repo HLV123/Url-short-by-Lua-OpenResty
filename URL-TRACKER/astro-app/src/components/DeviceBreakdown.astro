@@ -1,0 +1,77 @@
+---
+---
+
+<div class="bg-white rounded-xl p-6 border border-border stat-card">
+  <h3 class="text-lg font-semibold text-navy flex items-center gap-2 mb-4">
+    <span>📱</span> Phân bổ thiết bị
+  </h3>
+
+  <div id="device-breakdown" class="flex items-center gap-6">
+    <!-- Donut chart (CSS conic-gradient) -->
+    <div class="relative w-32 h-32 flex-shrink-0">
+      <div id="device-donut" class="w-full h-full rounded-full" style="background: conic-gradient(#6B7280 0% 100%);"></div>
+      <div class="absolute inset-3 bg-white rounded-full flex items-center justify-center">
+        <span id="device-total" class="text-lg font-bold text-navy">—</span>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div id="device-legend" class="flex-1 space-y-3">
+      <div class="text-sm text-text-muted text-center py-4">Đang tải...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DEVICE_CONFIG: Record<string, { icon: string; label: string; color: string }> = {
+    mobile: { icon: '📱', label: 'Mobile', color: '#EE6123' },
+    desktop: { icon: '💻', label: 'Desktop', color: '#2563EB' },
+    tablet: { icon: '📟', label: 'Tablet', color: '#10B981' },
+    bot: { icon: '🤖', label: 'Bot', color: '#6B7280' },
+  };
+
+  function renderDeviceBreakdown(breakdown: Record<string, number>) {
+    const donut = document.getElementById('device-donut');
+    const legend = document.getElementById('device-legend');
+    const totalEl = document.getElementById('device-total');
+
+    const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
+    if (totalEl) totalEl.textContent = total.toLocaleString();
+
+    if (!total || !donut || !legend) {
+      if (legend) legend.innerHTML = '<div class="text-sm text-text-muted">Chưa có dữ liệu</div>';
+      return;
+    }
+
+    // Build conic-gradient
+    let cumulative = 0;
+    const stops: string[] = [];
+    const entries = Object.entries(breakdown).filter(([_, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+
+    entries.forEach(([device, count]) => {
+      const config = DEVICE_CONFIG[device] || { color: '#6B7280' };
+      const pct = (count / total) * 100;
+      stops.push(`${config.color} ${cumulative}% ${cumulative + pct}%`);
+      cumulative += pct;
+    });
+
+    donut.style.background = `conic-gradient(${stops.join(', ')})`;
+
+    // Build legend
+    legend.innerHTML = entries.map(([device, count]) => {
+      const config = DEVICE_CONFIG[device] || { icon: '🔗', label: device, color: '#6B7280' };
+      const pct = Math.round((count / total) * 100);
+      return `
+        <div class="flex items-center gap-3">
+          <div class="w-3 h-3 rounded-sm flex-shrink-0" style="background: ${config.color};"></div>
+          <span class="text-sm flex-1">${config.icon} ${config.label}</span>
+          <span class="text-sm font-semibold tabular-nums">${pct}%</span>
+          <span class="text-xs text-text-muted tabular-nums">${count.toLocaleString()}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // @ts-ignore
+  window.renderDeviceBreakdown = renderDeviceBreakdown;
+</script>

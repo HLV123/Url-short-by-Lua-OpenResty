@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import FeatureSection from '../components/FeatureSection.astro';
+import DashboardShowcase from '../components/DashboardShowcase.astro';
+import LinkTable from '../components/LinkTable.astro';
+import CtaBanner from '../components/CtaBanner.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+---
+
+<BaseLayout>
+  <Navbar transparent={true} />
+  <Hero />
+  <FeatureSection />
+  <DashboardShowcase />
+  <LinkTable />
+  <CtaBanner />
+  <Footer />
+</BaseLayout>
